@@ -15,11 +15,18 @@ type FaceitResponse = {
   }
 };
 
+type Config = {
+  user: string,
+  timezone: string | undefined,
+  tint: number
+}
+
 export default function Home() {
   const router = useRouter();
-  const [config, setConfig] = useState<{ user: string, timezone: string | undefined }>({
+  const [config, setConfig] = useState<Config>({
     user: "",
-    timezone: undefined
+    timezone: undefined,
+    tint: 0.0
   });
   const [error, setError] = useState<string | undefined>();
   const [result, setResult] = useState<FaceitResponse | undefined>();
@@ -59,13 +66,25 @@ export default function Home() {
       if (typeof user !== 'string')
         return;
 
-      const timezone = router.query["tz"];
       if (config.user.length != 0)
         return;
 
-      setConfig({ 
+      const timezone = router.query["tz"];
+      const rawTint = router.query["tint"];
+
+      let tint = 0.0;
+      if (typeof rawTint === 'string') {
+        try { tint = Number.parseFloat(rawTint); }
+        catch { }
+
+        if (tint > 1.0 || tint < 0.0)
+          tint = 0.0;
+      }
+
+      setConfig({
         user, 
-        timezone: typeof timezone === 'string' ? timezone : undefined 
+        timezone: typeof timezone === 'string' ? timezone : undefined,
+        tint
       });
     }, 
     [router.query]
@@ -87,6 +106,26 @@ export default function Home() {
     return <p style={{ color: `var(--${diff.charCodeAt(0) === 43 ? 'positive' : 'negative'})`}}>{diff} <span style={{ color: "var(--default)" }}>idag</span></p>;
   };
 
+  const Base = () => {
+    return (
+      <>
+        <div className={styles.top}>
+          <p style={{ color: 'var(--eloWinsLosses)' }}>{result?.elo}</p>
+          <span style={{ color: 'var(--level)' }}>
+            <span style={{ color: 'var(--default)' }}> {'('} </span>
+            Level {result?.lvl}
+            <span style={{ color: 'var(--default)' }}> {')'}</span>
+          </span>
+        </div>
+        <div className={styles.bottom}>
+          {<TodayComponent/>}
+          <span style={{ color: 'var(--todayBracket)' }}>|</span>
+          <p style={{ color: 'var(--eloWinsLosses)' }}>W: {result?.latestMatchesTrend?.score?.wins}, L: {result?.latestMatchesTrend?.score?.loses}</p>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <Head>
@@ -97,19 +136,11 @@ export default function Home() {
         ? <p>{error}</p> 
         : (
           <div className={styles.container}>
-            <div className={styles.top}>
-              <p style={{ color: 'var(--eloWinsLosses)' }}>{result?.elo}</p>
-              <span style={{ color: 'var(--level)' }}>
-                <span style={{ color: 'var(--default)' }}> {'('} </span>
-                Level {result?.lvl}
-                <span style={{ color: 'var(--default)' }}> {')'}</span>
-              </span>
-            </div>
-            <div className={styles.bottom}>
-              {<TodayComponent/>}
-              <span style={{ color: 'var(--todayBracket)' }}>|</span>
-              <p style={{ color: 'var(--eloWinsLosses)' }}>W: {result?.latestMatchesTrend?.score?.wins}, L: {result?.latestMatchesTrend?.score?.loses}</p>
-            </div>
+            {config.tint <= 0.0 || config.tint > 1.0 ? <Base/> : (
+              <div className={styles.tinted} style={{ backgroundColor: `rgba(0, 0, 0, ${config.tint})` }}>
+                {<Base/>}
+              </div>
+            )}
           </div>
         )
       }

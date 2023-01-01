@@ -14,6 +14,10 @@
   margin: 0;
 }
 
+html {
+  padding: 5px;
+}
+
 p {
   font-family: 'Inter', sans-serif;
 }

@@ -1,5 +1,5 @@
 .container {
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
 }
 
@@ -11,4 +11,9 @@
 
 .top > p {
   font-weight: 500;
+}
+
+.tinted {
+  padding: 5px;
+  border-radius: 4px;
 }

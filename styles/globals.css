@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap');
+
+:root {
+  --default: #C8C8C8;
+  --positive: #40D472;
+  --negative: #EF4242;
+  --level: #EDCF66;
+  --todayBracket: #8B8B8B;
+  --eloWinsLosses: #DB7E3B;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+}
+
+p {
+  font-family: 'Inter', sans-serif;
+}

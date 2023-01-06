@@ -128,7 +128,7 @@ export default function Home() {
         : <div 
             className={`${styles.container} ${isTinted() ? styles.tinted : ''}`}
             style={{ backgroundColor: `rgba(0, 0, 0, ${isTinted() ? config.tint : 0.0})` }}
-            dangerouslySetInnerHTML={{ __html: config.html }}
+            dangerouslySetInnerHTML={{ __html: getProcessedHtml() }}
           />
       }
     </>

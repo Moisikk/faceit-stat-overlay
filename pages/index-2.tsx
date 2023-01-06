@@ -18,8 +18,7 @@ type FaceitResponse = {
 type Config = {
   user: string,
   timezone: string | undefined,
-  tint: number,
-  html: string
+  tint: number
 }
 
 export default function Home() {
@@ -27,8 +26,7 @@ export default function Home() {
   const [config, setConfig] = useState<Config>({
     user: "",
     timezone: undefined,
-    tint: 0.0,
-    html: '<p><span style="font-family: Arial; color: rgb(0, 0, 0); font-size: 20px;"><span style="color: rgb(255, 94, 0);">{elo}</span> <span style="color: rgb(140, 140, 140);">(</span> <span style="color: rgb(255, 228, 0);">Level {level}</span> </span><span style="color: rgb(140, 140, 140); font-size: 20px; font-family: Arial;">)</span><br></p><p><span style="font-size: 20px; font-family: Arial;">{elo_today_formatted||<span style="color: rgb(140, 140, 140);">+-0 today||</span><span style="color: rgb(171, 242, 0);">{elo_today}</span><span style="color: rgb(140, 140, 140);">&nbsp;today||</span><span style="color: rgb(241, 95, 95);">{elo_today}</span><span style="color: rgb(140, 140, 140);">&nbsp;today</span>}&nbsp;<span style="color: rgb(53, 53, 53);">|&nbsp;</span><span style="color: rgb(255, 94, 0);">W: {wins_today}, L: {losses_today}</span></span></p>'
+    tint: 0.0
   });
   const [error, setError] = useState<string | undefined>();
   const [result, setResult] = useState<FaceitResponse | undefined>();
@@ -62,20 +60,6 @@ export default function Home() {
     }
   };
 
-  const getProcessedHtml = () => {
-    const raw = config.html;
-    const today = !result ? '0' : result.todayEloDiff;
-    return !result ? raw : raw
-      .replaceAll("{elo}", result.elo.toString())
-      .replaceAll("{level}", result.lvl.toString())
-      .replaceAll("{wins_today}", result.latestMatchesTrend.score.wins.toString())
-      .replaceAll("{losses_today}", result.latestMatchesTrend.score.loses.toString())
-      .replaceAll(/\{elo_today_formatted\|\|(.+)\|\|(.+)\|\|(.+)\}/gm, today === '0' ? '$1' : (today.charAt(0) === '-' ? '$2' : '$3'))
-      .replaceAll("{elo_today}", today.toString());
-  };
-
-  const isTinted = () => config.tint > 0.0 && config.tint <= 1.0;
-
   useEffect(
     () => {
       const user = router.query["user"];
@@ -97,13 +81,11 @@ export default function Home() {
           tint = 0.0;
       }
 
-      const content = router.query["content"];
-      setConfig(old => ({
-        user,
+      setConfig({
+        user, 
         timezone: typeof timezone === 'string' ? timezone : undefined,
-        tint,
-        html: typeof content === 'string' ? content : old.html
-      }));
+        tint
+      });
     }, 
     [router.query]
   );
@@ -117,6 +99,33 @@ export default function Home() {
     [config]
   );
 
+  const TodayComponent = () => {
+    const diff = result?.todayEloDiff;
+    if (!diff || diff === '0')
+      return <p style={{ color: 'var(--default)' }}>+-0 idag</p>
+    return <p style={{ color: `var(--${diff.charCodeAt(0) === 43 ? 'positive' : 'negative'})`}}>{diff} <span style={{ color: "var(--default)" }}>idag</span></p>;
+  };
+
+  const Base = () => {
+    return (
+      <>
+        <div className={styles.top}>
+          <p style={{ color: 'var(--eloWinsLosses)' }}>{result?.elo}</p>
+          <span style={{ color: 'var(--level)' }}>
+            <span style={{ color: 'var(--default)' }}> {'('} </span>
+            Level {result?.lvl}
+            <span style={{ color: 'var(--default)' }}> {')'}</span>
+          </span>
+        </div>
+        <div className={styles.bottom}>
+          {<TodayComponent/>}
+          <span style={{ color: 'var(--todayBracket)' }}>|</span>
+          <p style={{ color: 'var(--eloWinsLosses)' }}>W: {result?.latestMatchesTrend?.score?.wins}, L: {result?.latestMatchesTrend?.score?.loses}</p>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <Head>
@@ -125,11 +134,15 @@ export default function Home() {
       </Head>
       {error 
         ? <p>{error}</p> 
-        : <div 
-            className={`${styles.container} ${isTinted() ? styles.tinted : ''}`}
-            style={{ backgroundColor: `rgba(0, 0, 0, ${isTinted() ? config.tint : 0.0})` }}
-            dangerouslySetInnerHTML={{ __html: getProcessedHtml() }}
-          />
+        : (
+          <div className={styles.container}>
+            {config.tint <= 0.0 || config.tint > 1.0 ? <Base/> : (
+              <div className={styles.tinted} style={{ backgroundColor: `rgba(0, 0, 0, ${config.tint})` }}>
+                {<Base/>}
+              </div>
+            )}
+          </div>
+        )
       }
     </>
   )

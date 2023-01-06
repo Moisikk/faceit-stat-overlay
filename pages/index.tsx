@@ -102,7 +102,7 @@ export default function Home() {
         user,
         timezone: typeof timezone === 'string' ? timezone : undefined,
         tint,
-        html: typeof content === 'string' ? content : old.html
+        html: typeof content === 'string' ? decodeURIComponent(content) : old.html
       }));
     }, 
     [router.query]
@@ -128,7 +128,7 @@ export default function Home() {
         : <div 
             className={`${styles.container} ${isTinted() ? styles.tinted : ''}`}
             style={{ backgroundColor: `rgba(0, 0, 0, ${isTinted() ? config.tint : 0.0})` }}
-            dangerouslySetInnerHTML={{ __html: getProcessedHtml() }}
+            dangerouslySetInnerHTML={{ __html: config.html }}
           />
       }
     </>

@@ -20,7 +20,7 @@ export default function Builder() {
     if (username.length === 0)
       return;
 
-    const link = `https://faceitstat.vercel.app?user=${username}${timezone !== undefined ? `&tz=${timezone}` : ''}&tint=${tint}&content=${content}`;
+    const link = `https://faceitstat.vercel.app?user=${username}${timezone !== undefined ? `&tz=${timezone}` : ''}&tint=${tint}&content=${encodeURIComponent(content)}`;
     navigator.clipboard.writeText(link);
   };
   

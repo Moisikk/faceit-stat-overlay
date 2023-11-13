@@ -35,7 +35,7 @@ export default function Home() {
 
   const ReadUser = async () => {
     const { user, timezone } = config;
-    const response = await fetch(`https://api.satont.ru/faceit?nick=${user}&game=csgo${timezone ? `&timezone=${timezone}` : ""}`);
+    const response = await fetch(`https://api.satont.ru/faceit?nick=${user}&game=cs2${timezone ? `&timezone=${timezone}` : ""}`);
     
     if (!response.ok)
       return undefined;
